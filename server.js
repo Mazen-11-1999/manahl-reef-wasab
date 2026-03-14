@@ -6,6 +6,11 @@
  * تم إعادة هيكلته بالكامل لتحسين الأمان والأداء
  */
 
+// Authentication middleware (must be defined at the very top)
+const { authenticateToken } = require('./middleware/auth');
+const { validate, sanitize } = require('./middleware/validation');
+const validators = require('./middleware/validators');
+
 // Load environment variables
 const config = require('./config/env');
 const { connectDB } = require('./config/database');
@@ -215,11 +220,6 @@ app.post('/api/admin/login', async (req, res) => {
         res.status(500).json({ success: false, message: 'حدث خطأ في تسجيل الدخول' });
     }
 });
-
-// Authentication middleware (must be defined before routes)
-const { authenticateToken } = require('./middleware/auth');
-const { validate, sanitize } = require('./middleware/validation');
-const validators = require('./middleware/validators');
 
 // Admin Change Password Route
 app.put('/api/admin/change-password', authenticateToken, async (req, res) => {
