@@ -123,10 +123,12 @@ const connectDB = async () => {
             return null;
         }
 
-        // في الإنتاج، نوقف الخادم
+        // في الإنتاج (Vercel)، لا نوقف الخادم
         console.error('❌ فشل الاتصال بقاعدة البيانات:', error.message);
-        console.error('❌ لا يمكن تشغيل الخادم بدون قاعدة البيانات في بيئة الإنتاج');
-        process.exit(1);
+        console.error('⚠️  الخادم سيعمل بدون قاعدة بيانات في Vercel');
+        console.error('💡 بعض الميزات قد لا تعمل بشكل صحيح');
+        // في Vercel، نعيد null بدلاً من رمي الخطأ
+        return null;
     }
 };
 
