@@ -135,53 +135,6 @@ exports.update = catchAsync(async (req, res, next) => {
         settings: settings.toObject()
     });
 });
-const settings = await getOrCreateSettings();
-const allowed = [
-    'storeName', 'storeNameEn', 'logoUrl', 'description', 'address',
-    'phone', 'whatsappPhone', 'email',
-    'tiktok', 'snapchat', 'facebook', 'instagram', 'whatsapp',
-    'maintenanceMode', 'showPrices', 'allowOrders', 'allowReviews', 'emailNotifications'
-];
-if (req.body.storyGallery !== undefined && Array.isArray(req.body.storyGallery)) {
-    settings.storyGallery = req.body.storyGallery.slice(0, 6).map(item => ({
-        url: (item && item.url) ? String(item.url).trim() : '',
-        caption: (item && item.caption) ? String(item.caption).trim() : ''
-    }));
-}
-if (req.body.paymentMethods !== undefined && Array.isArray(req.body.paymentMethods)) {
-    settings.paymentMethods = req.body.paymentMethods.map(item => ({
-        type: ['bank', 'hawala', 'phone', 'card', 'other'].includes(item.type) ? item.type : 'bank',
-        label: (item && item.label) ? String(item.label).trim() : '',
-        bankName: (item && item.bankName) ? String(item.bankName).trim() : '',
-        accountHolder: (item && item.accountHolder) ? String(item.accountHolder).trim() : '',
-        accountNumber: (item && item.accountNumber) ? String(item.accountNumber).trim() : '',
-        iban: (item && item.iban) ? String(item.iban).trim() : '',
-        hawalaOfficeName: (item && item.hawalaOfficeName) ? String(item.hawalaOfficeName).trim() : '',
-        recipientName: (item && item.recipientName) ? String(item.recipientName).trim() : '',
-        recipientPhone: (item && item.recipientPhone) ? String(item.recipientPhone).trim() : '',
-        branchOrAgent: (item && item.branchOrAgent) ? String(item.branchOrAgent).trim() : '',
-        phoneNumber: (item && item.phoneNumber) ? String(item.phoneNumber).trim() : '',
-        cardNumber: (item && item.cardNumber) ? String(item.cardNumber).trim() : '',
-        holderName: (item && item.holderName) ? String(item.holderName).trim() : '',
-        note: (item && item.note) ? String(item.note).trim() : ''
-    }));
-}
-allowed.forEach(field => {
-    if (req.body[field] !== undefined) {
-        if (typeof settings[field] === 'boolean') {
-            settings[field] = req.body[field] === true || req.body[field] === 'true';
-        } else {
-            settings[field] = req.body[field] != null ? String(req.body[field]).trim() : '';
-        }
-    }
-});
-await settings.save();
-res.status(200).json({
-    success: true,
-    message: 'تم حفظ الإعدادات بنجاح',
-    settings: settings.toObject()
-});
-            });
 
 /**
  * رفع شعار الموقع (للمشرف فقط) - يحفظ الملف ويحدّث logoUrl
