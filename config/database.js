@@ -9,10 +9,18 @@ const config = require('./env');
 // تحسينات الاتصال (تدعم عدداً كبيراً من المستخدمين)
 const connectionOptions = {
     maxPoolSize: 2, // تقليل حجم التجمع للبيئة Serverless
-    serverSelectionTimeoutMS: 10000, // 10 ثوانٍ للاتصال (مثلاً Atlas)
-    socketTimeoutMS: 60000, // 60 ثانية قبل إغلاق المقبس الخامل
+    serverSelectionTimeoutMS: 30000, // زيادة إلى 30 ثانية
+    socketTimeoutMS: 45000, // 45 ثانية قبل إغلاق المقبس الخامل
     family: 4,
-    bufferCommands: false
+    bufferCommands: false,
+    retryWrites: true,
+    w: 'majority',
+    readPreference: 'primary',
+    connectTimeoutMS: 30000, // 30 ثانية للاتصال الأولي
+    heartbeatFrequencyMS: 10000, // 10 ثواني لل heartbeat
+    maxIdleTimeMS: 30000, // 30 ثانية كحد أقصى للاتصال الخامل
+    waitQueueTimeoutMS: 5000, // 5 ثواني للانتظار في الطابور
+    retryReads: true
 };
 
 // معالجة الأخطاء
@@ -42,7 +50,8 @@ process.on('SIGINT', async () => {
 const connectDB = async () => {
     try {
         console.log('🔄 محاولة الاتصال بـ MongoDB...');
-        console.log('⏱️  مهلة الاتصال: 15 ثانية...');
+        console.log('⏱️  مهلة الاتصال: 30 ثانية...');
+        console.log('🔗 Connection String:', config.mongodbUri.replace(/:([^:@]+)@/, ':***@')); // إخفاء كلمة المرور
 
         // محاولة تحميل databaseOptimization بشكل آمن
         let dbOptimization;
@@ -87,6 +96,8 @@ const connectDB = async () => {
         } else {
             // في الإنتاج، استخدم الاتصال العادي
             await mongoose.connect(config.mongodbUri, optimizedOptions);
+            console.log('✅ تم الاتصال بـ MongoDB بنجاح!');
+            console.log('🔗 Connection String:', config.mongodbUri.replace(/:([^:@]+)@/, ':***@')); // إخفاء كلمة المرور
             if (mongoose.connection.readyState === 1) {
                 console.log('✅ اتصال MongoDB ناجح');
             } else {
@@ -109,9 +120,27 @@ const connectDB = async () => {
         if (mongoose.connection.readyState === 1) {
             return mongoose.connection;
         } else {
-            return null;
+            throw new Error('الاتصال فشل - readyState: ' + mongoose.connection.readyState);
         }
     } catch (error) {
+        console.error('❌ خطأ في الاتصال بـ MongoDB:', error.message);
+
+        // في الإنتاج، لا ننهي العملية بل نحاول مرة أخرى
+        if (config.nodeEnv === 'production') {
+            console.warn('⚠️  فشل الاتصال بقاعدة البيانات في الإنتاج - سيتم استخدام البيانات الوهمية');
+            console.log('🔄 سيتم إعادة محاولة الاتصال في الخلفية...');
+
+            // محاولة إعادة الاتصال بعد 10 ثواني
+            setTimeout(() => {
+                console.log('🔄 إعادة محاولة الاتصال بقاعدة البيانات...');
+                connectDB().catch(err => {
+                    console.warn('⚠️  فشلت إعادة محاولة الاتصال:', err.message);
+                });
+            }, 10000);
+
+            return; // لا نرمي الخطأ في الإنتاج
+        }
+
         // في بيئة التطوير، لا نوقف الخادم إذا فشل الاتصال
         if (config.nodeEnv === 'development') {
             console.warn('⚠️  فشل الاتصال بقاعدة البيانات:', error.message);
@@ -123,6 +152,7 @@ const connectDB = async () => {
             return null;
         }
 
+        throw error; // في بيئات أخرى، نرمي الخطأ
         // في الإنتاج (Vercel)، لا نوقف الخادم أبداً
         console.error('❌ فشل الاتصال بقاعدة البيانات:', error.message);
         console.error('⚠️  الخادم سيستمر بدون قاعدة بيانات في Vercel');
