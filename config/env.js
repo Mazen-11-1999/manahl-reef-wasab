@@ -45,7 +45,7 @@ const config = {
 
     // Admin (سيتم إنشاء حساب المشرف الأول عند التشغيل الأول)
     adminUsername: process.env.ADMIN_USERNAME || 'admin',
-    adminEmail: process.env.ADMIN_EMAIL || 'admin@manahlbadr.com',
+    adminEmail: process.env.ADMIN_EMAIL || 'reefwosaab@gmail.com',
     adminPassword: process.env.ADMIN_PASSWORD || 'ChangeThisPassword123!',
 
     // Security

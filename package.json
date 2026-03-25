@@ -1,7 +1,7 @@
 {
-  "name": "manahl-badr-backend",
+  "name": "manahl-reef-wasab",
   "version": "1.0.0",
-  "description": "Backend API for Manahl Badr - Reef Wasab Honey Farm E-commerce Platform",
+  "description": "مناحل ريف وصاب - Backend API for Manahl Reef Wasab Honey Farm E-commerce Platform",
   "main": "server.js",
   "scripts": {
     "start": "node server.js",
