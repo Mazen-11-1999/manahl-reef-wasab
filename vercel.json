@@ -18,7 +18,8 @@
   ],
   "env": {
     "NODE_ENV": "production",
-    "DISABLE_CACHE": "1"
+    "DISABLE_CACHE": "1",
+    "FORCE_REBUILD": "1"
   },
   "functions": {
     "server.js": {
