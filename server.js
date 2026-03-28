@@ -298,16 +298,6 @@ const aiAssistantRoutes = require('./routes/aiAssistantRoutes');
 // OLD ROUTES (للتوافق مع الكود الحالي)
 // ============================================
 
-// Import old models temporarily (mongoose already required at top)
-// Import models from separate files
-const Product = require('./models/Product');
-const Order = require('./models/Order');
-const Contest = require('./models/Contest');
-const ContestSettings = require('./models/ContestSettings');
-const DidYouKnow = require('./models/DidYouKnow');
-const Story = require('./models/Story');
-const Category = require('./models/Category');
-
 // File upload configuration
 const multer = require('multer');
 const storage = multer.diskStorage({
@@ -331,6 +321,15 @@ const storage = multer.diskStorage({
         cb(null, uniqueSuffix + path.extname(file.originalname));
     }
 });
+
+// Import models from separate files
+const Product = require('./models/Product');
+const Order = require('./models/Order');
+const Contest = require('./models/Contest');
+const ContestSettings = require('./models/ContestSettings');
+const DidYouKnow = require('./models/DidYouKnow');
+const Story = require('./models/Story');
+const Category = require('./models/Category');
 
 // Security Middleware
 const { generalRateLimit, loginRateLimit, apiRateLimit, uploadRateLimit, commentRateLimit, searchRateLimit } = require('./middleware/advancedSecurity');
